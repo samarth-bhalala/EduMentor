@@ -57,6 +57,18 @@ st.markdown("""
 # Sidebar navigation
 st.sidebar.title("🎓 EduMentor AI")
 st.sidebar.markdown("---")
+
+# Check backend connectivity
+try:
+    backend_status = requests.get(f"{API_BASE_URL}/", timeout=2)
+    backend_online = backend_status.status_code == 200
+except:
+    backend_online = False
+
+if not backend_online:
+    st.sidebar.warning("⚠️ Backend offline. Running in demo mode.")
+    st.sidebar.caption("Features will show UI only. Deploy backend for full functionality.")
+
 page = st.sidebar.radio(
     "Navigate",
     ["🏠 Home", "📚 Study Buddy", "💬 Doubt Solver", "🎥 YouTube Summarizer", "❓ Quiz", "🚀 Career Planner", "📊 Analytics"]

@@ -1,22 +1,17 @@
-# Backend
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-python-multipart==0.0.6
-
-# Frontend
+# Frontend dependencies only (for Streamlit Cloud)
 streamlit==1.31.0
 plotly==5.18.0
 requests==2.31.0
-
-# ML/AI - Use compatible versions for Streamlit Cloud
-sentence-transformers==2.3.1
-faiss-cpu==1.7.4
-huggingface-hub==0.20.3
-torch==2.1.0
-numpy<2.0.0
-
-# Utilities
-PyPDF2==3.0.1
 python-dotenv==1.0.0
-pydantic[email]==2.5.3
-youtube-transcript-api==0.6.1
+
+# Backend dependencies (commented out for Streamlit Cloud deployment)
+# Uncomment these for local development with full backend
+# fastapi==0.109.0
+# uvicorn[standard]==0.27.0
+# python-multipart==0.0.6
+# sentence-transformers==2.3.1
+# faiss-cpu==1.7.4
+# huggingface-hub==0.20.3
+# PyPDF2==3.0.1
+# pydantic[email]==2.5.3
+# youtube-transcript-api==0.6.1
