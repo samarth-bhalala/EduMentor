@@ -39,3 +39,13 @@ class MCQQuestion(BaseModel):
     question: str
     options: List[str]
     correct_answer: int
+
+class ChatMessage(BaseModel):
+    user_id: int
+    message: str
+
+class ChatHistoryResponse(BaseModel):
+    id: int
+    message: str
+    is_user: bool
+    timestamp: str

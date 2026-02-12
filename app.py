@@ -59,7 +59,7 @@ st.sidebar.title("🎓 EduMentor AI")
 st.sidebar.markdown("---")
 page = st.sidebar.radio(
     "Navigate",
-    ["🏠 Home", "📚 Study Buddy", "❓ Quiz", "🚀 Career Planner", "📊 Analytics"]
+    ["🏠 Home", "📚 Study Buddy", "💬 Doubt Solver", "🎥 YouTube Summarizer", "❓ Quiz", "🚀 Career Planner", "📊 Analytics"]
 )
 st.sidebar.markdown("---")
 st.sidebar.info(f"**User ID:** {st.session_state.user_id}")
@@ -77,11 +77,24 @@ if page == "🏠 Home":
         st.info("✨ Context-aware answers from your documents")
     
     with col2:
+        st.markdown("### 💬 Doubt Solver")
+        st.write("Chat with AI tutor to solve your doubts instantly")
+        st.info("✨ Smart conversational learning assistant")
+    
+    with col3:
         st.markdown("### ❓ Quiz Generator")
         st.write("Generate AI quizzes on any topic and test your knowledge")
         st.info("✨ Instant feedback and progress tracking")
     
-    with col3:
+    st.markdown("---")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("### 🎥 YouTube Summarizer")
+        st.write("Get AI-powered summaries of YouTube videos")
+        st.info("✨ Extract key insights from video content")
+    
+    with col2:
         st.markdown("### 🚀 Career Planner")
         st.write("Analyze skills and get personalized learning roadmaps")
         st.info("✨ AI-generated career guidance")
@@ -175,6 +188,190 @@ elif page == "📚 Study Buddy":
                         st.error(f"Connection error: {str(e)}")
             else:
                 st.warning("Please enter a question")
+
+# ==================== DOUBT SOLVER CHATBOT PAGE ====================
+elif page == "💬 Doubt Solver":
+    st.title("💬 Smart Doubt Solver")
+    st.markdown("Chat with your AI tutor to solve doubts instantly!")
+    
+    # Initialize chat history in session state
+    if 'chat_messages' not in st.session_state:
+        st.session_state.chat_messages = []
+        # Load chat history from backend
+        try:
+            response = requests.get(f"{API_BASE_URL}/doubt-solver/history/{st.session_state.user_id}")
+            if response.status_code == 200:
+                history = response.json()
+                st.session_state.chat_messages = [
+                    {"role": "user" if msg["is_user"] else "assistant", "content": msg["message"]}
+                    for msg in history
+                ]
+        except:
+            pass  # Start with empty history if backend unavailable
+    
+    # Chat container
+    chat_container = st.container()
+    
+    # Display chat history
+    with chat_container:
+        for message in st.session_state.chat_messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+    
+    # Chat input
+    if prompt := st.chat_input("Ask me anything... (e.g., 'Explain Newton's laws of motion')"):
+        # Add user message to chat
+        st.session_state.chat_messages.append({"role": "user", "content": prompt})
+        
+        with chat_container:
+            with st.chat_message("user"):
+                st.markdown(prompt)
+        
+        # Get AI response
+        with chat_container:
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
+                    try:
+                        response = requests.post(
+                            f"{API_BASE_URL}/doubt-solver/chat",
+                            json={
+                                'user_id': st.session_state.user_id,
+                                'message': prompt
+                            }
+                        )
+                        
+                        if response.status_code == 200:
+                            result = response.json()
+                            ai_response = result['ai_response']
+                            st.markdown(ai_response)
+                            
+                            # Add assistant message to chat
+                            st.session_state.chat_messages.append({"role": "assistant", "content": ai_response})
+                        else:
+                            error_detail = response.json().get('detail', 'Unknown error')
+                            error_msg = f"Error: {error_detail}"
+                            st.error(error_msg)
+                            st.session_state.chat_messages.append({"role": "assistant", "content": error_msg})
+                    except Exception as e:
+                        error_msg = f"Connection error: {str(e)}"
+                        st.error(error_msg)
+                        st.session_state.chat_messages.append({"role": "assistant", "content": error_msg})
+    
+    # Sidebar options
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("### 💬 Chat Options")
+        
+        if st.button("🗑️ Clear Chat History"):
+            try:
+                response = requests.delete(f"{API_BASE_URL}/doubt-solver/history/{st.session_state.user_id}")
+                if response.status_code == 200:
+                    st.session_state.chat_messages = []
+                    st.success("Chat history cleared!")
+                    st.rerun()
+            except Exception as e:
+                st.error(f"Error clearing history: {str(e)}")
+        
+        st.markdown("---")
+        st.markdown("**💡 Tips:**")
+        st.markdown("- Ask conceptual questions")
+        st.markdown("- Request step-by-step solutions")
+        st.markdown("- Clarify difficult topics")
+        st.markdown("- Get homework help")
+
+# ==================== YOUTUBE SUMMARIZER PAGE ====================
+elif page == "🎥 YouTube Summarizer":
+    st.title("🎥 YouTube Summarizer")
+    st.markdown("Get AI-powered summaries of YouTube videos instantly!")
+    
+    tab1, tab2 = st.tabs(["📝 Summarize Video", "📚 History"])
+    
+    with tab1:
+        st.subheader("Summarize YouTube Video")
+        
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            video_url = st.text_input(
+                "YouTube Video URL:",
+                placeholder="https://www.youtube.com/watch?v=..."
+            )
+        with col2:
+            summary_type = st.selectbox(
+                "Summary Type:",
+                ["detailed", "brief", "bullet_points"],
+                format_func=lambda x: {
+                    "detailed": "📄 Detailed",
+                    "brief": "⚡ Brief",
+                    "bullet_points": "📌 Bullet Points"
+                }[x]
+            )
+        
+        if st.button("🎬 Summarize Video", type="primary"):
+            if video_url:
+                with st.spinner("Extracting transcript and generating summary..."):
+                    try:
+                        response = requests.post(
+                            f"{API_BASE_URL}/youtube/summarize",
+                            json={
+                                'user_id': st.session_state.user_id,
+                                'video_url': video_url,
+                                'summary_type': summary_type
+                            }
+                        )
+                        
+                        if response.status_code == 200:
+                            result = response.json()
+                            
+                            st.success("✅ Summary generated successfully!")
+                            
+                            # Display video info
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.metric("Word Count", result['word_count'])
+                            with col2:
+                                st.metric("Transcript Length", f"{result['transcript_length']} chars")
+                            
+                            # Display summary
+                            st.markdown("### 📝 Summary:")
+                            st.markdown(result['summary'])
+                            
+                            # Show video embed
+                            st.markdown("---")
+                            st.markdown("### 🎥 Video:")
+                            st.video(video_url)
+                        else:
+                            st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+                    except Exception as e:
+                        st.error(f"Connection error: {str(e)}\n\nMake sure the backend is running on port 8000")
+            else:
+                st.warning("Please enter a YouTube URL")
+        
+        # Example URLs
+        with st.expander("💡 Try these example videos"):
+            st.markdown("""
+            - **Tech Talk**: https://www.youtube.com/watch?v=aircAruvnKk
+            - **Tutorial**: https://www.youtube.com/watch?v=kqtD5dpn9C8
+            - **Educational**: https://www.youtube.com/watch?v=LnX3B9oaKzw
+            """)
+    
+    with tab2:
+        st.subheader("📚 Summary History")
+        try:
+            response = requests.get(f"{API_BASE_URL}/youtube/summaries/{st.session_state.user_id}")
+            if response.status_code == 200:
+                summaries = response.json()['summaries']
+                
+                if summaries:
+                    for summary in summaries:
+                        with st.expander(f"📹 {summary['video_url'][:50]}... - {summary['created_at']}"):
+                            st.markdown(f"**Type:** {summary['summary_type']}")
+                            st.markdown(f"**Summary:**")
+                            st.markdown(summary['summary'])
+                            st.markdown(f"[Watch Video]({summary['video_url']})")
+                else:
+                    st.info("No summaries yet. Summarize a YouTube video to see it here!")
+        except:
+            st.warning("Could not load summaries. Make sure backend is running.")
 
 # ==================== QUIZ PAGE ====================
 elif page == "❓ Quiz":

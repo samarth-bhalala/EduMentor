@@ -77,6 +77,18 @@ def init_database():
         )
     """)
     
+    # Chat history table for doubt solver
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS chat_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            message TEXT NOT NULL,
+            is_user BOOLEAN NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+    
     conn.commit()
     conn.close()
     print("✅ Database initialized successfully")

@@ -5,7 +5,7 @@ Main entry point for the API server
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.database import init_database
-from backend.routers import study, quiz, career
+from backend.routers import study, quiz, career, youtube, doubt_solver
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -33,6 +33,8 @@ async def startup_event():
 app.include_router(study.router)
 app.include_router(quiz.router)
 app.include_router(career.router)
+app.include_router(youtube.router)
+app.include_router(doubt_solver.router)
 
 @app.get("/")
 async def root():
@@ -43,7 +45,9 @@ async def root():
         "endpoints": {
             "study": "/study",
             "quiz": "/quiz",
-            "career": "/career"
+            "career": "/career",
+            "youtube": "/youtube",
+            "doubt-solver": "/doubt-solver"
         }
     }
 
