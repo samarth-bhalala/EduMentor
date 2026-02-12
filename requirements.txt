@@ -1,0 +1,20 @@
+# Backend
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+sqlalchemy==2.0.25
+
+# Frontend
+streamlit==1.31.0
+plotly==5.18.0
+requests==2.31.0
+
+# ML/AI
+sentence-transformers==2.3.1
+faiss-cpu==1.9.0.post1
+huggingface-hub==0.20.3
+
+# Utilities
+PyPDF2==3.0.1
+python-dotenv==1.0.0
+pydantic==2.5.3
